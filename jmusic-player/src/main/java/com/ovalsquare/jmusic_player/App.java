@@ -6,8 +6,15 @@ package com.ovalsquare.jmusic_player;
  */
 public class App 
 {
+	public void SongTest() {
+		SongHandler sh = new SongHandler();
+		sh.printMetadata();
+	}
     public static void main( String[] args )
     {
-        System.out.println( "Hello GitHub!" );
+    	
+    	SongHandler sh = new SongHandler();
+//		sh.printMetadata();
+    	sh.stackoverflow();
     }
 }
