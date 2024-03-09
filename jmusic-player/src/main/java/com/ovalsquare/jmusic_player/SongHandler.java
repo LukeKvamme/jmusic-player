@@ -1,125 +1,98 @@
 package com.ovalsquare.jmusic_player;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.File;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 
-import org.apache.tika.exception.TikaException;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.CompositeParser;
-import org.apache.tika.parser.ParseContext;
-import org.apache.tika.parser.Parser;
-import org.apache.tika.parser.mp3.Mp3Parser;
-import java.net.ContentHandler;
-import org.xml.sax.helpers;
-import org.apache.tika.sax.BasicContentHandlerFactory;
+import com.mpatric.mp3agic.ID3v1;
+import com.mpatric.mp3agic.ID3v1Tag;
+import com.mpatric.mp3agic.ID3v2;
+import com.mpatric.mp3agic.ID3v24Tag;
+import com.mpatric.mp3agic.InvalidDataException;
+import com.mpatric.mp3agic.Mp3File;
+import com.mpatric.mp3agic.NotSupportedException;
+import com.mpatric.mp3agic.UnsupportedTagException;
 
-// "A:\vampire heart (slowed  reverb).mp3"
+
 public class SongHandler {
-	private Metadata _metadata;
-	private String songPath;
 	private ArrayList<Song> _songList;
-	private Parser _parser;
-	private ContentHandler _handler;
-	private BasicContentHandlerFactory factory;
-	private ParseContext _parseContext;
-	
-	public SongHandler() {
-		this.songPath = "A:\\Bruno Mars - Grenade (Official Music Video).mp3";
+	private String _songDirectory;
+	private Song _song;
+	private Mp3File _mp3file;
+	private ID3v1 _v1Tag;
+	private ID3v2 _v2Tag;
+
+	public SongHandler(String song_directory) {
 		
-		this._parser = new Mp3Parser();
-		this._metadata = new Metadata();
-		this._handler = new BasicContentHandlerFactory().getNewContentHandler()t;
-		this._parseContext = new ParseContext();
+		this._songDirectory = (song_directory);
 		this._songList = new ArrayList<Song>();
+		this._song = new Song();
+		this._mp3file = null;
+		this._v1Tag = null;
+		this._v2Tag = null;
 	}
 	
-	/**
-     * @param args
-     */
-    public void stackoverflow() {
-        String fileLocation = this.songPath;
-
-        try {
-
-        InputStream input = new FileInputStream(new File(fileLocation));
-        ContentHandler handler = new DefaultHandler();
-        Metadata metadata = new Metadata();
-        Parser parser = new Mp3Parser();
-        ParseContext parseCtx = new ParseContext();
-        parser.parse(input, handler, metadata, parseCtx);
-        input.close();
-
-        // List all metadata
-        String[] metadataNames = metadata.names();
-
-        for(String name : metadataNames){
-        System.out.println(name + ": " + metadata.get(name));
-        }
-
-        // Retrieve the necessary info from metadata
-        // Names - title, xmpDM:artist etc. - mentioned below may differ based
-        System.out.println("----------------------------------------------");
-        System.out.println("Title: " + metadata.get("title"));
-        System.out.println("Artists: " + metadata.get("xmpDM:artist"));
-        System.out.println("Composer : "+metadata.get("xmpDM:composer"));
-        System.out.println("Genre : "+metadata.get("xmpDM:genre"));
-        System.out.println("Album : "+metadata.get("xmpDM:album"));
-
-        } catch (FileNotFoundException e) {
-        e.printStackTrace();
-        } catch (IOException e) {
-        e.printStackTrace();
-        } catch (SAXException e) {
-        e.printStackTrace();
-        } catch (TikaException e) {
-        e.printStackTrace();
-        }
-       }
-    
-	
-	
-	public void printMetadata() {
-		InputStream stream = null;
-		try {
-			stream = new FileInputStream(new File(songPath));
-		} catch (FileNotFoundException e) {
-			System.out.println("File not found, is the song path correct?");
-			e.printStackTrace();
-		} 
-		try {
-		    try {
-				_parser.parse(stream, _handler, _metadata, _parseContext);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SAXException e) {
-				System.out.println("XHTML SAX processing error with _handler var.");
-				e.printStackTrace();
-			} catch (TikaException e) {
-				System.out.println("Stream can be read but not parsed, likely a corrupt file.");
-				e.printStackTrace();
-			} // parse the stream
-		} finally {
-		    try {
-				stream.close();
-			} catch (IOException e) {
-				System.out.println("Failed to close the stream.");
-				e.printStackTrace();
-			} // close the stream
+	public ArrayList<Song> createSongList() {
+		File dir = new File(this._songDirectory);
+		File[] song_files = dir.listFiles((File pathname) -> pathname.getName().endsWith(".mp3"));
+		
+		for (File song : song_files) {
+			this._songList.add(createSong(song.getAbsolutePath()));
 		}
-        
-        String[] data = _metadata.names();
-        for (String thing : data) {
-        	System.out.println(thing + " " + _metadata.get(thing));
-        }
-		System.out.println(_metadata.names());
-		System.out.println("made it to the end somehow");
+		
+		return this._songList;
 	}
-	
-	
+
+	/**
+	 * Given a filepath to the .mp3 song, creates a Song object with attributes it obtains from the metadata of the
+	 * 	.mp3 file. Gets the attributes from the MP3 ID3v1 or ID3v2 tag, whichever it has.
+	 * @param song_path
+	 * @return
+	 */
+	private Song createSong(String song_path) {
+		try {
+			this._mp3file = new Mp3File(song_path);
+		} catch (UnsupportedTagException e) {
+			e.printStackTrace();
+		} catch (InvalidDataException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		if (this._mp3file.hasId3v1Tag()) {
+			this._v1Tag = this._mp3file.getId3v1Tag();
+			String[] song_attributes = {
+					this._v1Tag.getTitle(),
+					this._v1Tag.getArtist(),
+					this._v1Tag.getAlbum(),
+					this._v1Tag.getTrack(),
+					this._v1Tag.getYear(),
+					this._v1Tag.getGenreDescription(),
+					this._v1Tag.getComment(),
+					song_path
+					};
+			this._song = new Song(song_attributes);
+		}
+
+		else if (this._mp3file.hasId3v2Tag()) {
+			this._v2Tag = this._mp3file.getId3v2Tag();
+			String[] song_attributes = {
+					this._v2Tag.getTitle(),
+					this._v2Tag.getArtist(),
+					this._v2Tag.getAlbum(),
+					this._v2Tag.getTrack(),
+					this._v2Tag.getYear(),
+					this._v2Tag.getGenreDescription(),
+					this._v2Tag.getComment(),
+					song_path
+					};
+			this._song = new Song(song_attributes);
+		}
+		
+		return this._song;
+	}
+
 
 }

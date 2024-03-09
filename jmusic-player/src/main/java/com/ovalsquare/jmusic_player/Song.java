@@ -3,8 +3,9 @@ package com.ovalsquare.jmusic_player;
 
 
 public class Song {
+	private String _songPath;
 	private String _title;
-	private String _subject;
+	private String _artist;
 	private String _album;
 	private String _track;
 	private String _year;
@@ -12,13 +13,37 @@ public class Song {
 	private String _comment;
 	
 	public Song() {
+		this._songPath = null;
 		this.set_title("");
-		this.set_subject("");
+		this.set_artist("");
 		this.set_album("");
 		this.set_track("");
 		this.set_year("");
 		this.set_genre("");
 		this.set_comment("");
+	}
+	
+	/**
+	 * Overloaded constructor that takes in a String array where each index value is mapped:
+	 * 		0 = song title
+	 * 		1 = song artist
+	 * 		2 = song album
+	 * 		3 = song track
+	 * 		4 = song year
+	 * 		5 = song genre
+	 * 		6 = song comment
+	 * 		7 = the song file path
+	 * @param songAttributes
+	 */
+	public Song(String[] song_attributes) {
+		this._title = song_attributes[0];
+		this._artist = song_attributes[1];
+		this._album = song_attributes[2];
+		this._track = song_attributes[3];
+		this._year = song_attributes[4];
+		this._genre = song_attributes[5];
+		this._comment = song_attributes[6];
+		this._songPath = song_attributes[7];
 	}
 
 	/**
@@ -36,17 +61,17 @@ public class Song {
 	}
 
 	/**
-	 * @return the _subject
+	 * @return the _artist
 	 */
-	public String get_subject() {
-		return _subject;
+	public String get_artist() {
+		return _artist;
 	}
 
 	/**
-	 * @param _subject the _subject to set
+	 * @param artist the _artist to set
 	 */
-	public void set_subject(String _subject) {
-		this._subject = _subject;
+	public void set_artist(String artist) {
+		this._artist = artist;
 	}
 
 	/**
@@ -117,6 +142,20 @@ public class Song {
 	 */
 	public void set_comment(String _comment) {
 		this._comment = _comment;
+	}
+	
+	/**
+	 * @return the _songPath
+	 */
+	public String get_songPath() {
+		return _songPath;
+	}
+
+	/**
+	 * @param song_path the _songPath to set
+	 */
+	public void set_songPath(String song_path) {
+		this._songPath = song_path;
 	}
 
 }
