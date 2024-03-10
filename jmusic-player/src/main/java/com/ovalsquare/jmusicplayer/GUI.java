@@ -20,51 +20,57 @@ import javafx.stage.Stage;
 
 public class GUI extends Application {
 
-	    private ListView<String> fileList;
-	    private MediaPlayer mediaPlayer; 
+	    private ListView<String> _fileList;
+	    private MediaPlayer _mediaPlayer;
 
 	    @Override
 	    public void start(Stage primaryStage) {
-	        primaryStage.setTitle("File Browser with MediaPlayer");
+	        primaryStage.setTitle("Jmusic Player");
 
-	        fileList = new ListView<>();
+	        _fileList = new ListView<>();
 	        updateFileList(new File(System.getProperty("user.home").concat("\\Music")));
 
-	        fileList.setOnMouseClicked(event -> {
-	            String selectedItem = fileList.getSelectionModel().getSelectedItem();
-	            if (selectedItem != null) {
-	                String filePath = System.getProperty("user.home") + File.separator + selectedItem;
-	                File file = new File(filePath);
+	        _fileList.setOnMouseClicked(event -> {
+	            String selected_item = _fileList.getSelectionModel().getSelectedItem();
+	            if (selected_item != null) {
+	                String file_path = System.getProperty("user.home").concat("\\Music") + File.separator + selected_item;
+	                File file = new File(file_path);
 	                if (file.isFile() && file.getName().toLowerCase().endsWith(".mp3")) {
 	                    playMP3(file);
 	                }
 	            }
 	        });
 
-	        VBox root = new VBox(fileList);
+	        VBox file_list_view = new VBox(_fileList);
+	        
+	        BorderPane root = new BorderPane();
+	        root.setRight(file_list_view);
 
-	        Scene scene = new Scene(root, 400, 300);
+	        Scene scene = new Scene(root, 500, 400);
 	        primaryStage.setScene(scene);
 	        primaryStage.show();
 	    }
 
 	    private void updateFileList(File directory) {
-	        fileList.getItems().clear();
+	        _fileList.getItems().clear();
 	        File[] files = directory.listFiles();
+	        
 	        if (files != null) {
 	            for (File file : files) {
-	                fileList.getItems().add(file.getName());
+	            	if (file.getName().toLowerCase().endsWith(".mp3")) {
+	            		_fileList.getItems().add(file.getName());
+	            	}
 	            }
 	        }
 	    }
 
 	    private void playMP3(File file) {
-	        if (mediaPlayer != null) {
-	            mediaPlayer.stop();
+	        if (_mediaPlayer != null) {
+	            _mediaPlayer.stop();
 	        }
 	        Media media = new Media(file.toURI().toString());
-	        mediaPlayer = new MediaPlayer(media);
-	        mediaPlayer.play();
+	        _mediaPlayer = new MediaPlayer(media);
+	        _mediaPlayer.play();
 	    }
 
 	    public static void main(String[] args) {
