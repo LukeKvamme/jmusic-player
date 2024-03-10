@@ -8,6 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -61,6 +62,7 @@ public class GUI extends Application {
         // Add functionality for queuing last
 
         HBox controls = new HBox(playButton, pauseButton, stopButton, queueNextButton, queueLastButton);
+//        VBox stuff = new VBox()
 
         BorderPane root = new BorderPane();
         root.setLeft(_musicListView);
@@ -71,6 +73,11 @@ public class GUI extends Application {
         primaryStage.show();
     }
 
+    /**
+     * Updates the list of songs in the ListView on the left side of the application.
+     * 		Displays _musicListView to the user.
+     * 		Stores the actual Song object in the _musicFiles ListView for the backend.
+     */
     private void updateFileList() {
         _musicListView.getItems().clear();
         _musicFiles.getItems().clear();
@@ -82,10 +89,23 @@ public class GUI extends Application {
     	
     }
 
+    /**
+     * Plays the selected song. 
+     * 
+     * Checks if a song has been selected before Play was hit. If Play is hit before
+     * 		a song is selected, an error message will pop up asking the user to select a song before trying again.
+     * 
+     * Then checks whether song has already been selected and is on-pause before creating a new media player 
+     * 		on the newly-selected song.
+     */
     private void playSelectedFile() {
-    	Song selected_song = _musicFiles.getItems().get(_musicListView.getSelectionModel().getSelectedIndex());
-//    	System.out.println(selected_song);
-//    	System.out.println(_musicFiles.getItems());
+    	Song selected_song = null;
+    	try {
+    		selected_song = _musicFiles.getItems().get(_musicListView.getSelectionModel().getSelectedIndex());
+    	} catch (IndexOutOfBoundsException exception) {
+    		nothingSelectedError();
+    	}
+
     	if (pauseButton.isSelected()) {
     		mediaPlayer.play();
     		playButton.setSelected(true);
@@ -106,7 +126,21 @@ public class GUI extends Application {
     	}
     }
 
-    private void pausePlayback() {
+    private void nothingSelectedError() {
+    	Stage error_stage = new Stage();
+    	StackPane root = new StackPane();
+    	Label error_label = new Label("Please select a song and press Play again.");
+    	
+    	root.getChildren().add(error_label);
+		Scene error_scene = new Scene(root, 400, 100);
+		
+		error_stage.setScene(error_scene);
+		error_stage.setTitle("Alert");
+		error_stage.setAlwaysOnTop(true);
+		error_stage.show();
+	}
+
+	private void pausePlayback() {
         if (mediaPlayer != null && mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
             mediaPlayer.pause();
             playButton.setSelected(false);
