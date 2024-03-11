@@ -1,19 +1,26 @@
 package com.ovalsquare.jmusicplayer;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
@@ -21,6 +28,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.scene.image.Image;
 
 public class GUI extends Application {
 
@@ -60,17 +68,56 @@ public class GUI extends Application {
 
         queueLastButton = new Button("Queue Last");
         // Add functionality for queuing last
+        
 
-        HBox controls = new HBox(playButton, pauseButton, stopButton, queueNextButton, queueLastButton);
-//        VBox stuff = new VBox()
+        // ImageView above ProgressBar
+        ImageView imageView = new ImageView(new Image("space.jpg"));
+        imageView.setPreserveRatio(true);
+        imageView.fitWidthProperty().bind(primaryStage.widthProperty().multiply(0.8)); // 60% of the window width
+        imageView.fitHeightProperty().bind(primaryStage.heightProperty().multiply(0.6)); // 60% of the window height
+        
+        
+        Pane left_spacer = new Pane();
+        HBox.setHgrow(left_spacer, Priority.ALWAYS); // Allow spacer to expand vertically
 
+        Pane right_spacer = new Pane();
+        HBox.setHgrow(right_spacer, Priority.ALWAYS); // Allow spacer to expand vertically
+        
+        HBox controls = new HBox(left_spacer, playButton, pauseButton, stopButton, queueNextButton, queueLastButton, right_spacer);
+        HBox centered_image_view = new HBox(left_spacer, imageView, right_spacer);
+
+     // Empty space between ImageView and ProgressBar
+        Pane image_view_spacer = new Pane();
+        VBox.setVgrow(image_view_spacer, Priority.ALWAYS); // Allow spacer to expand vertically
+        
+        // Empty space between ImageView and ProgressBar
+        Pane progress_bar_spacer = new Pane();
+//        spacer.setPrefHeight(200);
+        VBox.setVgrow(progress_bar_spacer, Priority.ALWAYS); // Allow spacer to expand vertically
+
+        // ProgressBar
+        ProgressBar progressBar = new ProgressBar();
+        progressBar.setProgress(0.5); // Example progress
+        progressBar.prefWidthProperty().bind(primaryStage.widthProperty()); // 60% of the window width
+
+
+        // VBox for ImageView and ProgressBar
+        VBox vBox = new VBox(image_view_spacer, centered_image_view, progress_bar_spacer, progressBar, controls);
+        vBox.setSpacing(10);
+   
+
+        // BorderPane to hold ListView on the left and VBox + Buttons on the right
         BorderPane root = new BorderPane();
         root.setLeft(_musicListView);
-        root.setBottom(controls);
+        root.setCenter(vBox);
+       //root.setBottom(controls);
 
-        Scene scene = new Scene(root, 600, 300);
+        // Create the scene and set it on the stage
+        Scene scene = new Scene(root, 600, 400);
         primaryStage.setScene(scene);
+        primaryStage.setTitle("Jmusic Player");
         primaryStage.show();
+        
     }
 
     /**
