@@ -15,38 +15,29 @@ import com.mpatric.mp3agic.UnsupportedTagException;
 
 
 public class SongHandler {
-	private ArrayList<Song> _songList;
+	public ArrayList<Song> _songList;
 	private String _songDirectory;
 	private Song _song;
 	private Mp3File _mp3file;
 	private ID3v1 _v1Tag;
 	private ID3v2 _v2Tag;
 
-	public SongHandler(String song_directory) {
-		
-		this._songDirectory = (song_directory);
+	public SongHandler() {
+		this._songDirectory = System.getProperty("user.home").concat("\\Music");
 		this._songList = new ArrayList<Song>();
+		this._songList = createSongList();
 		this._song = new Song();
 		this._mp3file = null;
 		this._v1Tag = null;
 		this._v2Tag = null;
 	}
 	
-//	public void play() {
-//		Media media = null;
-//		try {
-//		  media = new Media(getClass().getResource("/music/hero.mp3").toURI().toString());
-//		} catch (URISyntaxException e) {
-//		  e.printStackTrace();
-//		} 
-//	}
-	
 	public ArrayList<Song> createSongList() {
-		File dir = new File(this._songDirectory);
-		File[] song_files = dir.listFiles((File pathname) -> pathname.getName().endsWith(".mp3"));
+		File directory = new File(this._songDirectory);
+		File[] song_files = directory.listFiles((File pathname) -> pathname.getName().endsWith(".mp3"));
 		
 		for (File song : song_files) {
-			this._songList.add(createSong(song.getAbsolutePath()));
+			_songList.add(createSong(song.getAbsolutePath()));
 		}
 		
 		return this._songList;
@@ -55,6 +46,7 @@ public class SongHandler {
 	/**
 	 * Given a filepath to the .mp3 song, creates a Song object with attributes it obtains from the metadata of the
 	 * 	.mp3 file. Gets the attributes from the MP3 ID3v1 or ID3v2 tag, whichever it has.
+	 * 
 	 * @param song_path
 	 * @return
 	 */

@@ -13,7 +13,6 @@ public class Song {
 	private String _comment;
 	
 	public Song() {
-		this._songPath = null;
 		this.set_title("");
 		this.set_artist("");
 		this.set_album("");
@@ -21,6 +20,7 @@ public class Song {
 		this.set_year("");
 		this.set_genre("");
 		this.set_comment("");
+		this._songPath = ".";
 	}
 	
 	/**
